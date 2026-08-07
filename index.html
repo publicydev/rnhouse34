@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RN HOUSE - NFC DIGITAL</title>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --emerald-green: #0d5c3a;
+            --forest-green: #14452f;
+            --accent-green: #1b8a5a;
+            --gold-accent: #c5a059;
+            --light-green-bg: #eef7f2;
+            --dark-text: #1a2521;
+            --muted-text: #50635a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 🟢 الخلفية الخارجية العامة باللون الأخضر */
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at center, #1b5e3f 0%, #0d3824 50%, #051a10 100%);
+            position: relative;
+            overflow-x: hidden;
+            padding: 20px 15px;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            width: 320px;
+            height: 320px;
+            background: rgba(37, 211, 102, 0.12);
+            filter: blur(90px);
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        /* 🖼️ الواجهة الرئيسية تحتوي على الصورة بكامل ألوانها */
+        .nfc-card {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 28px;
+            padding: 30px 22px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5),
+                        0 0 30px rgba(13, 92, 58, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+            animation: cardAppear 0.8s ease-out forwards;
+        }
+
+        /* الصورة الأصلية تغطي الواجهة وتظهر بألوانها الطبيعية */
+        .card-bg-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+
+        /* الهيدر والعناوين */
+        .header {
+            background: rgba(255, 255, 255, 0.88);
+            padding: 18px 15px 14px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 🏷️ شعار RN الفاخر */
+        .brand-logo-badge {
+            width: 65px;
+            height: 65px;
+            background: linear-gradient(135deg, #0d5c3a, #083b25);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            box-shadow: 0 4px 12px rgba(13, 92, 58, 0.3);
+            border: 2px solid #ffffff;
+        }
+
+        .brand-logo-badge span {
+            font-family: 'Cinzel', serif;
+            font-size: 22px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: 1px;
+        }
+
+        .brand-title {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--emerald-green);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .brand-subtitle {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--muted-text);
+        }
+
+        /* 📋 القائمة الرئيسية للروابط والأزرار */
+        .main-list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .list-item-btn {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.92);
+            padding: 14px 18px;
+            border-radius: 16px;
+            text-decoration: none;
+            color: var(--dark-text);
+            font-weight: 700;
+            font-size: 13.5px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .list-item-btn .icon-wrapper {
+            width: 36px;
+            height: 36px;
+            background: var(--light-green-bg);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--emerald-green);
+            font-size: 16px;
+            margin-right: 14px;
+            flex-shrink: 0;
+        }
+
+        .list-item-btn span {
+            flex: 1;
+            text-align: left;
+        }
+
+        .list-item-btn .arrow {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .list-item-btn:hover {
+            background: #ffffff;
+            border-color: var(--emerald-green);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .list-item-btn.whatsapp-item .icon-wrapper {
+            background: #e6f9ed;
+            color: #25d366;
+        }
+
+        .list-item-btn.call-item .icon-wrapper {
+            background: #e7f4ee;
+            color: var(--emerald-green);
+        }
+
+        .card-footer {
+            margin-top: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+            background: rgba(0, 0, 0, 0.35);
+            padding: 6px 12px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+
+        .card-footer span {
+            color: #25d366;
+        }
+
+        @keyframes cardAppear {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Main Card -->
+    <div class="nfc-card">
+        <!-- 🖼️ صورة الواجهة الأصلية بكامل ألوانها -->
+        <img src="RN.png" alt="صورة الواجهة" class="card-bg-image">
+
+        <div class="header">
+            <!-- 🏷️ شعار RN الفاخر فوق الاسم -->
+            <div class="brand-logo-badge">
+                <span>RN</span>
+            </div>
+
+            <h1 class="brand-title">RN HOUSE</h1>
+            <p class="brand-subtitle">Décoration Élégante pour Maison</p>
+        </div>
+
+        <!-- 📋 القائمة الرئيسية -->
+        <ul class="main-list-container">
+            <li>
+                <button class="list-item-btn" id="saveContactBtn">
+                    <div class="icon-wrapper">
+                        <i class="fa-solid fa-user-plus"></i>
+                    </div>
+                    <span>Enregistrer Contact</span>
+                    <i class="fa-solid fa-chevron-right arrow"></i>
+                </button>
+            </li>
+
+            <li>
+                <button class="list-item-btn" id="savePageBtn">
+                    <div class="icon-wrapper">
+                        <i class="fa-solid fa-bookmark"></i>
+                    </div>
+                    <span>Sauvegarder la page</span>
+                    <i class="fa-solid fa-chevron-right arrow"></i>
+                </button>
+            </li>
+
+            <li>
+                <a href="tel:0778450569" class="list-item-btn call-item">
+                    <div class="icon-wrapper">
+                        <i class="fa-solid fa-phone"></i>
+                    </div>
+                    <span>Appeler</span>
+                    <i class="fa-solid fa-chevron-right arrow"></i>
+                </a>
+            </li>
+
+            <li>
+                <a href="https://wa.me/213778450569" target="_blank" class="list-item-btn whatsapp-item">
+                    <div class="icon-wrapper">
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </div>
+                    <span>WhatsApp</span>
+                    <i class="fa-solid fa-chevron-right arrow"></i>
+                </a>
+            </li>
+
+            <li>
+                <a href="https://maps.app.goo.gl/p5pLrQEzPEAcksTw6?g_st=ic" target="_blank" class="list-item-btn">
+                    <div class="icon-wrapper">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </div>
+                    <span>Localisation du magasin</span>
+                    <i class="fa-solid fa-chevron-right arrow"></i>
+                </a>
+            </li>
+
+            <li>
+                <a href="https://www.instagram.com/rn_house_94" target="_blank" class="list-item-btn">
+                    <div class="icon-wrapper">
+                        <i class="fa-brands fa-instagram"></i>
+                    </div>
+                    <span>Page Instagram</span>
+                    <i class="fa-solid fa-chevron-right arrow"></i>
+                </a>
+            </li>
+
+            <li>
+                <a href="https://www.facebook.com/share/1b9VXmX2Xg/?mibextid=wwXIfr" target="_blank" class="list-item-btn">
+                    <div class="icon-wrapper">
+                        <i class="fa-brands fa-facebook-f"></i>
+                    </div>
+                    <span>Page Facebook</span>
+                    <i class="fa-solid fa-chevron-right arrow"></i>
+                </a>
+            </li>
+
+            <li>
+                <a href="https://www.tiktok.com/@rnhouse34?_r=1&_t=ZS-98ep82z7V7B" target="_blank" class="list-item-btn">
+                    <div class="icon-wrapper">
+                        <i class="fa-brands fa-tiktok"></i>
+                    </div>
+                    <span>Compte TikTok</span>
+                    <i class="fa-solid fa-chevron-right arrow"></i>
+                </a>
+            </li>
+        </ul>
+
+        <!-- Footer -->
+        <div class="card-footer">
+            <p>DÉVELOPPÉ PAR <span>PUBLICYDEV</span></p>
+        </div>
+    </div>
+
+    <script>
+        // Save Contact Button
+        document.getElementById('saveContactBtn').addEventListener('click', () => {
+            const vcard = "BEGIN:VCARD\n" +
+                          "VERSION:3.0\n" +
+                          "FN:RN HOUSE Décoration\n" +
+                          "TEL;TYPE=CELL:0778450569\n" +
+                          "NOTE:Décoration Élégante pour Maison\n" +
+                          "END:VCARD";
+
+            const blob = new Blob([vcard], { type: "text/vcard" });
+            const url = URL.createObjectURL(blob);
+            const newLink = document.createElement('a');
+            newLink.download = "RN_HOUSE.vcf";
+            newLink.href = url;
+            newLink.click();
+        });
+
+        // Save Page Button
+        document.getElementById('savePageBtn').addEventListener('click', async () => {
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'RN HOUSE',
+                        text: 'RN HOUSE - Décoration Élégante pour Maison',
+                        url: window.location.href,
+                    });
+                } catch (err) {
+                    console.log('Share canceled');
+                }
+            } else {
+                alert('Appuyez sur (Ctrl + D) ou utilisez le menu de votre navigateur pour ajouter aux favoris.');
+            }
+        });
+    </script>
+</body>
+</html>
